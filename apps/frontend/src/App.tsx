@@ -1,10 +1,15 @@
-import { useSupabase } from "./hooks/useSupabase";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { useUser } from "./hooks/useUser"
+import { useState } from "react";
 
-function App() {
+function App(){
+  const [supabase, _setSupabase]= useState(createClient("https://oljprmqrtevlseoushbu.supabase.co", "sb_publishable__t45A4rZiR53nLv8ifYGbA_1_Lo9GVY"));
+  return <AppWrapper supabase={supabase} />
+}
 
-  const {claims}=useUser();
-  const supabase=useSupabase();
+function AppWrapper({supabase}: {supabase: SupabaseClient}) {
+
+  const {claims}=useUser(supabase);
 
   return (
     <div>
@@ -27,6 +32,33 @@ function App() {
       </button>}
 
       {JSON.stringify(claims)}
+
+      <button
+          onClick={async () => {
+              try {
+                  const { data } = await supabase.auth.getSession();
+
+                  const token = data.session?.access_token;
+
+                  const response = await fetch("http://localhost:3000/buy", {
+                      method: "POST",
+                      headers: {
+                          Authorization: token || "",
+                          "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({}),
+                  });
+
+                  const result = await response.json();
+                  console.log(result);
+              } catch (error) {
+                  console.error(error);
+              }
+          }}
+      >
+          Click here to buy
+      </button>
+      
     </div>
   )
 }
