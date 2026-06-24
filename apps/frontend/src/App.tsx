@@ -1,66 +1,30 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { useUser } from "./hooks/useUser"
-import { useState } from "react";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
+import { HomePage } from '@/pages/HomePage';
+import { MarketsPage } from '@/pages/MarketsPage';
+import { MarketDetailPage } from '@/pages/MarketDetailPage';
+import { DashboardPage } from '@/pages/DashboardPage';
+import { ProfilePage } from '@/pages/ProfilePage';
+import { HowItWorksPage } from '@/pages/HowItWorksPage';
 
-function App(){
-  const [supabase, _setSupabase]= useState(createClient("https://oljprmqrtevlseoushbu.supabase.co", "sb_publishable__t45A4rZiR53nLv8ifYGbA_1_Lo9GVY"));
-  return <AppWrapper supabase={supabase} />
-}
-
-function AppWrapper({supabase}: {supabase: SupabaseClient}) {
-
-  const {claims}=useUser(supabase);
+function App() {
+  const location = useLocation();
 
   return (
-    <div>
-      {window.solflare && !claims && <button onClick={async () => {
-        await supabase.auth.signInWithWeb3({
-          chain: "solana",
-          statement: "I confirm I want to sign in into the prediction market",
-          wallet: window.solflare
-        })
-      }}>
-        Sign in with Solana
-      </button>}
-
-      {claims && <button
-        onClick={async()=>{
-          await supabase.auth.signOut()
-        }}
-      >
-        LogOut
-      </button>}
-
-      {JSON.stringify(claims)}
-
-      <button
-          onClick={async () => {
-              try {
-                  const { data } = await supabase.auth.getSession();
-
-                  const token = data.session?.access_token;
-
-                  const response = await fetch("http://localhost:3000/buy", {
-                      method: "POST",
-                      headers: {
-                          Authorization: token || "",
-                          "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({}),
-                  });
-
-                  const result = await response.json();
-                  console.log(result);
-              } catch (error) {
-                  console.error(error);
-              }
-          }}
-      >
-          Click here to buy
-      </button>
-      
-    </div>
-  )
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/markets" element={<MarketsPage />} />
+        <Route path="/markets/:id" element={<MarketDetailPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/how-it-works" element={<HowItWorksPage />} />
+        {/* Catch-all → home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
 }
 
-export default App
+export default App;

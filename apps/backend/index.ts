@@ -25,11 +25,57 @@ function parseOrderbook(orderbook: unknown): Orderbook {
 
 // Get all markets
 app.get("/markets", async (req, res) => {
-    const markets = await prisma.market.findMany();
+    const markets = await prisma.market.findMany({
+        orderBy: { id: "desc" },
+    });
     res.json({
         markets
     });
 });
+
+// Create a new market (authenticated)
+app.post("/market/create", middleware, async (req, res) => {
+    const { title, description, resolutionDescription } = req.body;
+
+    if (!title || typeof title !== "string" || title.trim().length < 5) {
+        res.status(411).json({ message: "Title must be at least 5 characters" });
+        return;
+    }
+    if (!description || typeof description !== "string" || description.trim().length < 10) {
+        res.status(411).json({ message: "Description must be at least 10 characters" });
+        return;
+    }
+    if (!resolutionDescription || typeof resolutionDescription !== "string" || resolutionDescription.trim().length < 5) {
+        res.status(411).json({ message: "Resolution criteria is required" });
+        return;
+    }
+
+    try {
+        const market = await prisma.market.create({
+            data: {
+                title: title.trim(),
+                description: description.trim(),
+                resolutionDescription: resolutionDescription.trim(),
+                yesOrderbook: JSON.stringify({}),
+                noOrderbook: JSON.stringify({}),
+                totalQty: 0,
+            },
+        });
+        res.json({ market });
+    } catch (error: any) {
+        console.error("[/market/create] Error:", {
+            message: error?.message,
+            code: error?.code,
+            meta: error?.meta,
+        });
+        res.status(500).json({
+            message: error?.message ?? "Failed to create market",
+        });
+    }
+});
+
+
+
 
 app.post("/order", middleware, async (req, res) => {
     const { success, data } = CreateOrderSchema.safeParse(req.body);
