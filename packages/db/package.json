@@ -5,6 +5,9 @@
   "export": {
     "./": "./index.ts"
   },
+  "scripts": {
+    "build": "prisma generate"
+  },
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
