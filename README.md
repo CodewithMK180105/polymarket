@@ -1,159 +1,191 @@
-# Turborepo starter
+# Polymarket — Prediction Market Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+A full-stack, Web3-native prediction market platform where users can trade binary outcome contracts (*Yes* / *No*) on real-world events. Built as a Turborepo monorepo powered by Bun.
 
-## Using this example
+---
 
-Run the following command:
+## Overview
 
-```sh
-npx create-turbo@latest
+Polymarket lets authenticated users:
+
+- Browse and create prediction markets
+- Buy or sell **Yes** / **No** position contracts priced between 0–100¢
+- **Split** USD into equal Yes + No shares (guaranteed to sum to $1)
+- **Merge** matching Yes + No shares back into USD
+- Deposit (on-ramp) and withdraw (off-ramp) USD balance
+- Track their open positions, order history, and portfolio
+
+Prices are driven entirely by an on-chain-style central limit order book (CLOB) stored per market. When a buy order cannot be fully filled from existing opposing orders, the remainder is queued in the orderbook at the requested price.
+
+---
+
+## Repository Structure
+
+```
+polymarket/
+├── apps/
+│   ├── backend/          # Express REST API + CLOB matching engine
+│   └── frontend/         # React + Vite SPA
+└── packages/
+    ├── db/               # Prisma schema, client & migrations
+    ├── ui/               # Shared React component library
+    ├── eslint-config/    # Shared ESLint configuration
+    └── typescript-config/ # Shared tsconfig bases
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## Tech Stack
 
-### Apps and Packages
+| Layer | Technology |
+|---|---|
+| **Monorepo** | [Turborepo](https://turbo.build/) + [Bun](https://bun.sh/) workspaces |
+| **Frontend** | React 19, Vite, TypeScript, TailwindCSS v4 |
+| **UI Components** | Radix UI primitives, Framer Motion, Lucide icons |
+| **Data Fetching** | TanStack Query (React Query v5) |
+| **Routing** | React Router v7 |
+| **Backend** | Node.js, Express v5, TypeScript |
+| **Auth** | [Supabase Auth](https://supabase.com/docs/guides/auth) (JWT + wallet address via `user_metadata`) |
+| **Database** | PostgreSQL via [Prisma ORM](https://www.prisma.io/) |
+| **Validation** | Zod |
+| **Notifications** | Sonner |
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Data Models
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```
+User          — wallet address, USD balance (stored in cents)
+Market        — title, description, resolution criteria, Yes/No orderbooks, total qty
+Position      — userId × marketId × type (Yes | No), quantity held
+OrderHistory  — audit log of every Buy / Sell / Split / Merge action
 ```
 
-Without global `turbo`, use your package manager:
+---
 
-```sh
-cd my-turborepo
-npx turbo build
-bun dlx turbo build
-bun exec turbo build
+## API Endpoints
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/markets` | — | List all markets |
+| `GET` | `/market?marketId=` | — | Get a single market |
+| `POST` | `/market/create` | ✅ | Create a new prediction market |
+| `POST` | `/order` | ✅ | Place a buy or sell order (CLOB matching) |
+| `POST` | `/split` | ✅ | Convert USD → equal Yes + No shares |
+| `POST` | `/merge` | ✅ | Convert equal Yes + No shares → USD |
+| `GET` | `/balance` | ✅ | Get authenticated user's USD balance |
+| `GET` | `/positions` | ✅ | Get authenticated user's open positions |
+| `POST` | `/history` | ✅ | Get authenticated user's order history |
+| `POST` | `/onramp` | ✅ | Deposit USD into account |
+| `POST` | `/offramp` | ✅ | Withdraw USD from account |
+
+Authenticated routes require a `Authorization: Bearer <supabase-jwt>` header. The middleware resolves the wallet address from the JWT's `user_metadata` and auto-creates the user record on first access.
+
+---
+
+## Frontend Pages
+
+| Route | Page | Description |
+|---|---|---|
+| `/` | Home | Landing / hero page |
+| `/markets` | Markets | Browse all active prediction markets |
+| `/markets/:id` | Market Detail | View orderbook, place orders, split/merge |
+| `/dashboard` | Dashboard | Personal positions and portfolio summary |
+| `/profile` | Profile | Account settings and balance |
+| `/how-it-works` | How It Works | Platform explainer |
+
+---
+
+## Prerequisites
+
+- **Bun** ≥ 1.3  (`npm install -g bun`)
+- **Node.js** ≥ 18
+- **PostgreSQL** database (or a Supabase project — the DB URL is used directly)
+- A **Supabase** project for authentication
+
+---
+
+## Getting Started
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/your-username/polymarket.git
+cd polymarket
+bun install
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### 2. Configure Environment Variables
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+**`packages/db/.env`**
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 ```
 
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-bun exec turbo build --filter=docs
-bun exec turbo build --filter=docs
+**`apps/backend/.env`**
+```env
+SUPABASE_SECRET_KEY="your-supabase-service-role-key"
 ```
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+**`apps/frontend/.env`**
+```env
+VITE_BACKEND_URL="http://localhost:3000"
+VITE_SUPABASE_URL="https://your-project.supabase.co"
+VITE_SUPABASE_ANON_KEY="your-supabase-anon-key"
 ```
 
-Without global `turbo`, use your package manager:
+### 3. Run Database Migrations
 
-```sh
-cd my-turborepo
-npx turbo dev
-bun exec turbo dev
-bun exec turbo dev
+```bash
+cd packages/db
+bunx prisma migrate deploy
+bunx prisma generate
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### 4. Start Development Servers
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+From the repo root, start all apps simultaneously:
 
-```sh
-turbo dev --filter=web
+```bash
+bun dev
 ```
 
-Without global `turbo`:
+Or start individual apps:
 
-```sh
-npx turbo dev --filter=web
-bun exec turbo dev --filter=web
-bun exec turbo dev --filter=web
+```bash
+# Backend only (http://localhost:3000)
+bun dev --filter=backend
+
+# Frontend only (http://localhost:5173)
+bun dev --filter=frontend
 ```
 
-### Remote Caching
+---
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## Building for Production
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
+```bash
+bun run build
 ```
 
-Without global `turbo`, use your package manager:
+This runs `turbo build` across all packages and apps in the correct dependency order.
 
-```sh
-cd my-turborepo
-npx turbo login
-bun exec turbo login
-bun exec turbo login
-```
+---
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Order Matching Logic
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+The backend implements a **price-time priority CLOB**:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+1. On a **buy** order for Yes @ price `P`:
+   - Matches against existing Yes sell orders ≤ `P`, reducing their position and crediting their USD.
+   - Unfilled quantity is entered as a reverse (synthetic) No sell order at price `100 − P` in the No orderbook, enabling cross-side liquidity.
 
-```sh
-turbo link
-```
+2. On a **sell** order for Yes @ price `P`:
+   - Matches against No sell orders at price ≤ `100 − P`.
+   - Unfilled quantity is queued in the Yes orderbook.
 
-Without global `turbo`:
+3. **Split**: Atomically debits `amount` USD and credits `amount` Yes + `amount` No shares. Always guaranteed at zero slippage.
 
-```sh
-npx turbo link
-bun exec turbo link
-bun exec turbo link
-```
+4. **Merge**: Inverse of split — burns equal Yes + No shares and credits USD.
 
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+All order operations use PostgreSQL `SELECT … FOR UPDATE` row-level locking inside a transaction to prevent race conditions.
