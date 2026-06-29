@@ -1,6 +1,6 @@
 # Polymarket — Prediction Market Platform
 
-A full-stack, Web3-native prediction market platform where users can trade binary outcome contracts (*Yes* / *No*) on real-world events. Built as a Turborepo monorepo powered by Bun.
+A full-stack, Web3-native prediction market platform where users can trade binary outcome contracts (_Yes_ / _No_) on real-world events. Built as a Turborepo monorepo powered by Bun.
 
 ---
 
@@ -37,18 +37,18 @@ polymarket/
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Monorepo** | [Turborepo](https://turbo.build/) + [Bun](https://bun.sh/) workspaces |
-| **Frontend** | React 19, Vite, TypeScript, TailwindCSS v4 |
-| **UI Components** | Radix UI primitives, Framer Motion, Lucide icons |
-| **Data Fetching** | TanStack Query (React Query v5) |
-| **Routing** | React Router v7 |
-| **Backend** | Node.js, Express v5, TypeScript |
-| **Auth** | [Supabase Auth](https://supabase.com/docs/guides/auth) (JWT + wallet address via `user_metadata`) |
-| **Database** | PostgreSQL via [Prisma ORM](https://www.prisma.io/) |
-| **Validation** | Zod |
-| **Notifications** | Sonner |
+| Layer             | Technology                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| **Monorepo**      | [Turborepo](https://turbo.build/) + [Bun](https://bun.sh/) workspaces                             |
+| **Frontend**      | React 19, Vite, TypeScript, TailwindCSS v4                                                        |
+| **UI Components** | Radix UI primitives, Framer Motion, Lucide icons                                                  |
+| **Data Fetching** | TanStack Query (React Query v5)                                                                   |
+| **Routing**       | React Router v7                                                                                   |
+| **Backend**       | Node.js, Express v5, TypeScript                                                                   |
+| **Auth**          | [Supabase Auth](https://supabase.com/docs/guides/auth) (JWT + wallet address via `user_metadata`) |
+| **Database**      | PostgreSQL via [Prisma ORM](https://www.prisma.io/)                                               |
+| **Validation**    | Zod                                                                                               |
+| **Notifications** | Sonner                                                                                            |
 
 ---
 
@@ -65,19 +65,19 @@ OrderHistory  — audit log of every Buy / Sell / Split / Merge action
 
 ## API Endpoints
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| `GET` | `/markets` | — | List all markets |
-| `GET` | `/market?marketId=` | — | Get a single market |
-| `POST` | `/market/create` | ✅ | Create a new prediction market |
-| `POST` | `/order` | ✅ | Place a buy or sell order (CLOB matching) |
-| `POST` | `/split` | ✅ | Convert USD → equal Yes + No shares |
-| `POST` | `/merge` | ✅ | Convert equal Yes + No shares → USD |
-| `GET` | `/balance` | ✅ | Get authenticated user's USD balance |
-| `GET` | `/positions` | ✅ | Get authenticated user's open positions |
-| `POST` | `/history` | ✅ | Get authenticated user's order history |
-| `POST` | `/onramp` | ✅ | Deposit USD into account |
-| `POST` | `/offramp` | ✅ | Withdraw USD from account |
+| Method | Path                | Auth | Description                               |
+| ------ | ------------------- | ---- | ----------------------------------------- |
+| `GET`  | `/markets`          | —    | List all markets                          |
+| `GET`  | `/market?marketId=` | —    | Get a single market                       |
+| `POST` | `/market/create`    | ✅   | Create a new prediction market            |
+| `POST` | `/order`            | ✅   | Place a buy or sell order (CLOB matching) |
+| `POST` | `/split`            | ✅   | Convert USD → equal Yes + No shares       |
+| `POST` | `/merge`            | ✅   | Convert equal Yes + No shares → USD       |
+| `GET`  | `/balance`          | ✅   | Get authenticated user's USD balance      |
+| `GET`  | `/positions`        | ✅   | Get authenticated user's open positions   |
+| `POST` | `/history`          | ✅   | Get authenticated user's order history    |
+| `POST` | `/onramp`           | ✅   | Deposit USD into account                  |
+| `POST` | `/offramp`          | ✅   | Withdraw USD from account                 |
 
 Authenticated routes require a `Authorization: Bearer <supabase-jwt>` header. The middleware resolves the wallet address from the JWT's `user_metadata` and auto-creates the user record on first access.
 
@@ -85,20 +85,20 @@ Authenticated routes require a `Authorization: Bearer <supabase-jwt>` header. Th
 
 ## Frontend Pages
 
-| Route | Page | Description |
-|---|---|---|
-| `/` | Home | Landing / hero page |
-| `/markets` | Markets | Browse all active prediction markets |
-| `/markets/:id` | Market Detail | View orderbook, place orders, split/merge |
-| `/dashboard` | Dashboard | Personal positions and portfolio summary |
-| `/profile` | Profile | Account settings and balance |
-| `/how-it-works` | How It Works | Platform explainer |
+| Route           | Page          | Description                               |
+| --------------- | ------------- | ----------------------------------------- |
+| `/`             | Home          | Landing / hero page                       |
+| `/markets`      | Markets       | Browse all active prediction markets      |
+| `/markets/:id`  | Market Detail | View orderbook, place orders, split/merge |
+| `/dashboard`    | Dashboard     | Personal positions and portfolio summary  |
+| `/profile`      | Profile       | Account settings and balance              |
+| `/how-it-works` | How It Works  | Platform explainer                        |
 
 ---
 
 ## Prerequisites
 
-- **Bun** ≥ 1.3  (`npm install -g bun`)
+- **Bun** ≥ 1.3 (`npm install -g bun`)
 - **Node.js** ≥ 18
 - **PostgreSQL** database (or a Supabase project — the DB URL is used directly)
 - A **Supabase** project for authentication
@@ -110,7 +110,7 @@ Authenticated routes require a `Authorization: Bearer <supabase-jwt>` header. Th
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/your-username/polymarket.git
+git clone https://github.com/CodewithMK180105/polymarket
 cd polymarket
 bun install
 ```
@@ -118,20 +118,24 @@ bun install
 ### 2. Configure Environment Variables
 
 **`packages/db/.env`**
+
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 ```
 
 **`apps/backend/.env`**
+
 ```env
 SUPABASE_SECRET_KEY="your-supabase-service-role-key"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 ```
 
 **`apps/frontend/.env`**
+
 ```env
 VITE_BACKEND_URL="http://localhost:3000"
-VITE_SUPABASE_URL="https://your-project.supabase.co"
-VITE_SUPABASE_ANON_KEY="your-supabase-anon-key"
+PROJECTID="supabase-projectId"
+PUBLISHABLE_KEY="your-supabase-publishable-key"
 ```
 
 ### 3. Run Database Migrations
