@@ -10,6 +10,7 @@ import {
   SplitSchema,
   type Orderbook,
 } from "./types";
+import type { Prisma } from "db/generated/prisma/client";
 
 const app = express();
 const PORT = 3000;
@@ -106,7 +107,7 @@ app.post("/order", middleware, async (req, res) => {
   const originalOrderId = uuid();
 
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const response = await tx.$queryRaw<
         {
           yesOrderbook: unknown;
@@ -719,7 +720,7 @@ app.post("/split", middleware, async (req, res) => {
   }
   const marketId = data?.marketId;
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const userResponse = await tx.$queryRaw<
       { id: string; address: string; usdBalance: number }[]
     >`SELECT * FROM "User" WHERE id=${userId} FOR UPDATE;`;
@@ -813,7 +814,7 @@ app.post("/merge", middleware, async (req, res) => {
   const marketId = data?.marketId;
 
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const userResponse = await tx.$queryRaw<
         { id: string; address: string; usdBalance: number }[]
       >`SELECT * FROM "User" WHERE id=${userId} FOR UPDATE;`;
@@ -971,7 +972,7 @@ app.post("/onramp", middleware, async (req, res) => {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const userResponse = await tx.$queryRaw<
         { id: string; address: string; usdBalance: number }[]
       >`SELECT * FROM "User" WHERE id=${userId} FOR UPDATE;`;
@@ -1022,7 +1023,7 @@ app.post("/offramp", middleware, async (req, res) => {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const userResponse = await tx.$queryRaw<
         { id: string; address: string; usdBalance: number }[]
       >`SELECT * FROM "User" WHERE id=${userId} FOR UPDATE;`;
